@@ -1,4 +1,4 @@
-function App() {
+function App(): React.JSX.Element {
   return <h1>Pokémon Battle</h1>
 }
 
