@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { typeColor } from "../utils/poke";
 
 export type Mon = {
   id: number;
@@ -10,28 +11,6 @@ export type Mon = {
 
 const art = (id: number) =>
   `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
-
-// Можно вынести в src/lib/poke.ts и импортировать оттуда.
-export const typeColor: Record<string, string> = {
-  fire: "oklch(0.68 0.2 40)",
-  water: "oklch(0.62 0.15 245)",
-  grass: "oklch(0.7 0.18 140)",
-  electric: "oklch(0.85 0.17 95)",
-  psychic: "oklch(0.65 0.2 0)",
-  ice: "oklch(0.82 0.09 210)",
-  dragon: "oklch(0.5 0.2 280)",
-  dark: "oklch(0.4 0.03 40)",
-  fairy: "oklch(0.8 0.1 350)",
-  normal: "oklch(0.72 0.04 90)",
-  fighting: "oklch(0.52 0.18 30)",
-  flying: "oklch(0.75 0.1 260)",
-  poison: "oklch(0.55 0.17 320)",
-  ground: "oklch(0.7 0.12 75)",
-  rock: "oklch(0.62 0.08 80)",
-  bug: "oklch(0.7 0.16 120)",
-  ghost: "oklch(0.48 0.12 300)",
-  steel: "oklch(0.72 0.03 250)",
-};
 
 function TypeBadge({ type }: { type: string }) {
   return (
