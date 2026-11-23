@@ -1,0 +1,119 @@
+@import 'tailwindcss' source(none);
+@source "./";
+@import 'tw-animate-css';
+
+@theme inline {
+  --font-display: 'Press Start 2P', monospace;
+  --font-sans: 'Space Grotesk', system-ui, sans-serif;
+  --radius-lg: var(--radius);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--foreground);
+  --color-success: var(--success);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--border);
+  --color-ring: var(--primary);
+}
+
+:root {
+  --radius: 0.5rem;
+  --background: oklch(0.96 0.03 90);
+  --foreground: oklch(0.18 0.02 270);
+  --card: oklch(0.99 0.01 90);
+  --primary: oklch(0.6 0.22 27);
+  --primary-foreground: oklch(0.99 0.01 90);
+  --secondary: oklch(0.55 0.15 250);
+  --muted: oklch(0.91 0.03 90);
+  --muted-foreground: oklch(0.45 0.02 270);
+  --accent: oklch(0.87 0.17 95);
+  --success: oklch(0.68 0.17 150);
+  --destructive: oklch(0.55 0.22 27);
+  --border: oklch(0.18 0.02 270);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    background-image: radial-gradient(
+      color-mix(in oklab, var(--foreground) 12%, transparent) 1px,
+      transparent 1px
+    );
+    background-size: 18px 18px;
+  }
+}
+
+@utility brut {
+  border: 3px solid var(--color-border);
+  box-shadow: 5px 5px 0 var(--color-border);
+  border-radius: var(--radius);
+}
+@utility brut-sm {
+  border: 2px solid var(--color-border);
+  box-shadow: 3px 3px 0 var(--color-border);
+  border-radius: calc(var(--radius) - 2px);
+}
+@utility press {
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+  &:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 7px 7px 0 var(--color-border);
+  }
+  &:active {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 var(--color-border);
+  }
+}
+@utility font-pixel {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+
+@keyframes float {
+  50% {
+    transform: translateY(-10px);
+  }
+}
+@keyframes shake {
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+@utility animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+@utility animate-shake {
+  animation: shake 0.3s 3;
+}
+
+  @utility pokemon-card {
+  border: 3px solid var(--color-border);
+  box-shadow: 5px 5px 0 var(--color-border);
+  border-radius: var(--radius);
+  background-color: var(--color-card);
+  padding: 0.75rem;
+  transition: transform .1s, box-shadow .1s;
+  &:hover { transform: translate(-2px,-2px); box-shadow: 7px 7px 0 var(--color-border); }
+  &:active { transform: translate(3px,3px); box-shadow: 1px 1px 0 var(--color-border); }
+  & img { aspect-ratio: 1; width: 100%; transition: transform .2s; }
+  &:hover img { transform: scale(1.1); }
+}

@@ -1,5 +1,9 @@
 function App(): React.JSX.Element {
-  return <h1>Pokémon Battle</h1>
+  return (
+    <>
+      <div className="App">
+      </div>
+    </>
+  )
 }
-
 export default App
