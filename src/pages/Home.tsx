@@ -1,10 +1,19 @@
-import { useCallback, useEffect, useRef, useState, type ComponentProps } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ComponentProps,
+} from 'react'
 import PokemonCard from '../components/PokemonCard'
 import { PokemonModal } from '../components/PokemonModal'
 import { Hero } from '../components/Hero'
+import { usePokemonSearch } from '../utils/usePokemonSearch'
 
 type PokemonListItem = { name: string; url: string }
-type Mon = Parameters<NonNullable<ComponentProps<typeof PokemonModal>['onAddToRoster']>>[0]
+type Mon = Parameters<
+  NonNullable<ComponentProps<typeof PokemonModal>['onAddToRoster']>
+>[0]
 
 const PAGE_SIZE = 40
 
@@ -15,6 +24,8 @@ export default function Home() {
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const closeModal = useCallback(() => setSelectedId(null), [])
   const [roster, setRoster] = useState<Mon[]>([])
+  const [query, setQuery] = useState('')
+  const { results } = usePokemonSearch(query)
 
   useEffect(() => {
     fetch('https://pokeapi.co/api/v2/pokemon?limit=100000')
@@ -58,21 +69,50 @@ export default function Home() {
             { label: 'My roster', to: '/roster' },
           ]}
         />
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          {pokemon.slice(0, visibleCount).map((p) => {
-            const id = Number(p.url.split('/').filter(Boolean).pop())
-            return (
-              <PokemonCard
-                key={id}
-                id={id}
-                name={p.name}
-                onClick={() => setSelectedId(id)}
-              />
-            )
-          })}
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <h2 className="text-2xl font-bold font-pixel">Pokédex</h2>
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search Pokémon"
+            aria-label="Search Pokémon"
+            className="brut-sm w-64 bg-card px-3 py-2 outline-none focus:bg-accent"
+          />
         </div>
-
-        <div ref={sentinelRef} className="h-10" />
+        {results === null ? (
+          <>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              {pokemon.slice(0, visibleCount).map((p) => {
+                const id = Number(p.url.split('/').filter(Boolean).pop())
+                return (
+                  <PokemonCard
+                    key={id}
+                    id={id}
+                    name={p.name}
+                    onClick={() => setSelectedId(id)}
+                  />
+                )
+              })}
+            </div>
+            <div ref={sentinelRef} className="h-10" />
+          </>
+        ) : results.length === 0 ? (
+          <p>Nothing found</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {results.map((p) => {
+              const id = p.id
+              return (
+                <PokemonCard
+                  key={id}
+                  id={id}
+                  name={p.name}
+                  onClick={() => setSelectedId(id)}
+                />
+              )
+            })}
+          </div>
+        )}
       </main>
 
       {selectedId !== null ? (
