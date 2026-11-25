@@ -5,13 +5,14 @@ export default function PokemonCard({ id, name, onClick }: Props) {
 
   return (
     <button
+      type="button"
       onClick={onClick}
-      className="border-2 border-black bg-white p-3 text-left"
+      className="pokemon-card w-full text-left"
     >
-      <div className="rounded-md bg-gray-100 p-2">
+      <div className="rounded-md bg-muted p-2">
         <img src={image} alt={name} loading="lazy" className="aspect-square w-full" />
       </div>
-      <p className="mt-2 text-xs text-gray-500">#{String(id).padStart(3, "0")}</p>
+      <p className="mt-2 text-xs text-muted-foreground">#{String(id).padStart(3, "0")}</p>
       <p className="font-bold capitalize">{name}</p>
     </button>
   );
