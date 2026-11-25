@@ -1,9 +1,14 @@
+import { Routes, Route } from 'react-router-dom'
+import Layout from './components/Layout'
 import Home from './pages/Home'
-import { Route, Routes } from 'react-router-dom'
 
-function App(): React.JSX.Element {
+export default function App() {
   return (
-   <Home />
+    <Routes>
+      <Route element={<Layout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="*" element={<p>This page is not yet ready</p>} />
+      </Route>
+    </Routes>
   )
 }
-export default App

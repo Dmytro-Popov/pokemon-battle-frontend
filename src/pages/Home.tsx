@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type ComponentProps } from 'react'
 import PokemonCard from '../components/PokemonCard'
 import { PokemonModal } from '../components/PokemonModal'
 import { Hero } from '../components/Hero'
 
 type PokemonListItem = { name: string; url: string }
+type Mon = Parameters<NonNullable<ComponentProps<typeof PokemonModal>['onAddToRoster']>>[0]
 
 const PAGE_SIZE = 40
 
