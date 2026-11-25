@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import PokemonCard from '../components/PokemonCard'
 import { PokemonModal } from '../components/PokemonModal'
+import { Hero } from '../components/Hero'
 
 type PokemonListItem = { name: string; url: string }
 
@@ -43,6 +44,19 @@ export default function Home() {
   return (
     <>
       <main className="mx-auto max-w-6xl p-4">
+        <Hero
+          eyebrow="Retro battle arena"
+          title={['Gotta battle', "'em all."]}
+          text="Pick your team, challenge wild Pokémon and climb the leaderboard."
+          image={{
+            src: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png',
+            alt: 'Pikachu',
+          }}
+          actions={[
+            { label: 'Start battle', to: '/battle', variant: 'primary' },
+            { label: 'My roster', to: '/roster' },
+          ]}
+        />
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {pokemon.slice(0, visibleCount).map((p) => {
             const id = Number(p.url.split('/').filter(Boolean).pop())
