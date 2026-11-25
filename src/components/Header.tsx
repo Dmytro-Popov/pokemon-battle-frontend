@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 
 const links = [
-  { to: '/pokedex', label: 'Pokédex' },
+  // { to: '/pokedex', label: 'Pokédex' },
   { to: '/roster', label: 'Roster' },
   { to: '/battle', label: 'Battle' },
   { to: '/ranks', label: 'Ranks' },
