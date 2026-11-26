@@ -4,6 +4,8 @@ import { typeColor } from "../utils/poke";
 export type Mon = {
   id: number;
   name: string;
+  height: number;
+  weight: number;
   types: string[];
   stats: Record<string, number>;
   abilities: string[];
@@ -26,12 +28,13 @@ function TypeBadge({ type }: { type: string }) {
 type PokemonModalProps = {
   id: number;
   onClose: () => void;
-  onAddToRoster?: (pokemon: Mon) => void;
+  onAddToRoster?: (pokemon: Mon) => string;
 };
 
 export function PokemonModal({ id, onClose, onAddToRoster }: PokemonModalProps) {
   const [pokemon, setPokemon] = useState<Mon | null>(null);
   const [error, setError] = useState("");
+  const [rosterMessage, setRosterMessage] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -47,6 +50,8 @@ export function PokemonModal({ id, onClose, onAddToRoster }: PokemonModalProps) 
         setPokemon({
           id: data.id,
           name: data.name,
+          height: data.height,
+          weight: data.weight,
           types: data.types.map((item: any) => item.type.name),
           abilities: data.abilities.map((item: any) => item.ability.name),
           stats: Object.fromEntries(
@@ -162,13 +167,20 @@ export function PokemonModal({ id, onClose, onAddToRoster }: PokemonModalProps) 
               </p>
 
               {onAddToRoster && (
-                <button
-                  type="button"
-                  onClick={() => onAddToRoster(pokemon)}
-                  className="brut press mt-6 w-full bg-success py-3 font-pixel text-xs"
-                >
-                  + Add to roster
-                </button>
+                <>
+                  {rosterMessage && (
+                    <p role="status" className="mt-4 text-sm font-bold">
+                      {rosterMessage}
+                    </p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setRosterMessage(onAddToRoster(pokemon))}
+                    className="brut press mt-6 w-full bg-success py-3 font-pixel text-xs"
+                  >
+                    + Add to roster
+                  </button>
+                </>
               )}
             </>
           )}
