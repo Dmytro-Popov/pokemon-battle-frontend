@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { clearToken, getToken } from '../utils/auth'
+import { clearSession, getToken } from '../utils/auth'
 
 const links = [
   { to: '/roster', label: 'Roster' },
@@ -16,10 +16,10 @@ export default function Header() {
   useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const loggedIn = Boolean(getToken())
-  const canAccessPrivatePages = loggedIn || import.meta.env.DEV
+  const canAccessPrivatePages = loggedIn 
 
   const logout = () => {
-    clearToken()
+    clearSession()
     setMenuOpen(false)
     nav('/login')
   }

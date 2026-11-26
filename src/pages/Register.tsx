@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authRequest } from "../utils/auth";
+import { authRequest, setSession } from "../utils/auth";
 
 export default function Register() {
   const nav = useNavigate();
@@ -26,8 +26,10 @@ export default function Register() {
     setErr("");
     setLoading(true);
     try {
-      await authRequest("register", { name, email, password });
-      nav("/login");
+     const { accessToken, username } = await authRequest("register", { username: name, email, password });
+  if (!accessToken) throw new Error("No token received.");
+ setSession( accessToken, username );
+      nav("/");
     } catch (error) {
       setErr(error instanceof Error ? error.message : "Sign up failed.");
     } finally {

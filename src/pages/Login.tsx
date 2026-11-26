@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { authRequest, setToken } from "../utils/auth";
+import { authRequest, setSession } from "../utils/auth";
 
 export default function Login() {
   const nav = useNavigate();
@@ -25,9 +25,9 @@ export default function Login() {
     setErr("");
     setLoading(true);
     try {
-      const { token } = await authRequest("login", { email, password });
-      if (!token) throw new Error("No token received.");
-      setToken(token);
+      const { accessToken, username } = await authRequest("login", { email, password });
+      if (!accessToken) throw new Error("No token received.");
+      setSession( accessToken, username );
       nav(location.state?.from ?? "/", { replace: true });
     } catch (error) {
       setErr(error instanceof Error ? error.message : "Login failed.");
