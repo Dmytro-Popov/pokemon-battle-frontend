@@ -98,6 +98,58 @@
     transform: translateX(6px);
   }
 }
+
+@keyframes battle-attack {
+  0%, 100% {
+    transform: translateX(0) scale(1);
+  }
+  45% {
+    transform: translateX(18px) scale(1.06);
+  }
+  70% {
+    transform: translateX(-5px) scale(0.98);
+  }
+}
+
+@keyframes battle-damage-popup {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 10px) scale(0.8);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -70px) scale(1.1);
+  }
+}
+
+@utility animate-battle-attack {
+  animation: battle-attack 0.35s ease-out;
+}
+
+@utility battle-damage-popup {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  z-index: 10;
+  min-width: 3rem;
+  height: 1.25rem;
+  padding: 0 0.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+  background-color: var(--color-destructive);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  line-height: 1;
+  font-weight: 900;
+  pointer-events: none;
+  text-align: center;
+  animation: battle-damage-popup 1.8s ease-out forwards;
+}
 @utility animate-float {
   animation: float 3s ease-in-out infinite;
 }

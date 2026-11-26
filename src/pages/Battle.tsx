@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import BattleArena from '../components/BattleArena'
 import BattleControls from '../components/BattleControls'
 import BattleTeamPanel from '../components/BattleTeamPanel'
@@ -26,6 +26,13 @@ export default function Battle() {
   const [battleMessage, setBattleMessage] = useState('Choose an attack.')
   const [isTurnInProgress, setIsTurnInProgress] = useState(false)
   const [battleOver, setBattleOver] = useState(false)
+  const [attackAnimation, setAttackAnimation] = useState<'player' | 'opponent' | null>(null)
+  const [damagePopup, setDamagePopup] = useState<{
+    target: 'player' | 'opponent'
+    amount: number
+    id: number
+  } | null>(null)
+  const popupSequence = useRef(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const { names, error: namesError } = usePokemonNames()
@@ -69,6 +76,8 @@ export default function Battle() {
         setFaintedOpponentIds([])
         setBattleOver(false)
         setBattleMessage('Choose an attack.')
+        setAttackAnimation(null)
+        setDamagePopup(null)
       } catch (loadError) {
         if (!cancelled) {
           setError(
@@ -107,6 +116,11 @@ export default function Battle() {
     setActivePlayer(pokemon)
     setPlayerHealth(100)
     setBattleMessage(`${pokemon.name} is ready to fight.`)
+  }
+
+  function showDamagePopup(target: 'player' | 'opponent', amount: number) {
+    popupSequence.current += 1
+    setDamagePopup({ target, amount, id: popupSequence.current })
   }
 
   function chooseNextOpponent() {
@@ -160,6 +174,12 @@ export default function Battle() {
       1,
       Math.round((firstDamage / (second.stats.hp ?? 1)) * 100),
     )
+    setAttackAnimation(playerGoesFirst ? 'player' : 'opponent')
+    showDamagePopup(
+      playerGoesFirst ? 'opponent' : 'player',
+      firstDamagePercent,
+    )
+    window.setTimeout(() => setAttackAnimation(null), 350)
 
     if (playerGoesFirst) {
       const nextOpponentHealth = Math.max(0, opponentHealth - firstDamagePercent)
@@ -190,13 +210,16 @@ export default function Battle() {
     }
 
     window.setTimeout(() => {
-      const responseDamage = calculateDamage(second, first, BATTLE_ATTACKS[0])
+      const responseAttack = playerGoesFirst ? BATTLE_ATTACKS[0] : attack
+      const responseDamage = calculateDamage(second, first, responseAttack)
       const responseDamagePercent = Math.max(
         1,
         Math.round((responseDamage / (first.stats.hp ?? 1)) * 100),
       )
 
       if (playerGoesFirst) {
+        setAttackAnimation('opponent')
+        showDamagePopup('player', responseDamagePercent)
         const nextPlayerHealth = Math.max(0, playerHealth - responseDamagePercent)
         setPlayerHealth(nextPlayerHealth)
         setBattleMessage(`${activeOpponent.name} used Tackle.`)
@@ -210,6 +233,8 @@ export default function Battle() {
           setIsTurnInProgress(false)
         }
       } else {
+        setAttackAnimation('player')
+        showDamagePopup('opponent', responseDamagePercent)
         const nextOpponentHealth = Math.max(0, opponentHealth - responseDamagePercent)
         setOpponentHealth(nextOpponentHealth)
         setBattleMessage(`${activeOpponent.name} took damage.`)
@@ -242,6 +267,8 @@ export default function Battle() {
           opponent={activeOpponent}
           playerHealth={playerHealth}
           opponentHealth={opponentHealth}
+            attackAnimation={attackAnimation}
+            damagePopup={damagePopup}
         />
       ) : (
         <section className="brut grid min-h-80 place-items-center bg-accent p-8 text-center">
@@ -258,6 +285,7 @@ export default function Battle() {
             attacks={BATTLE_ATTACKS}
             team={playerTeam}
             activeId={activePlayer.id}
+            faintedIds={faintedPlayerIds}
             disabled={isTurnInProgress || battleOver}
             onAttack={performAttack}
             onChoosePokemon={choosePlayerPokemon}
