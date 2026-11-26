@@ -13,7 +13,7 @@ const linkBase =
 export default function Header() {
   return (
     <header className="bg-primary border-b-4 border-border">
-      <div className="flex items-center justify-between gap-4 px-6 py-3 ">
+      <div className="flex items-center justify-between gap-4 px-6 py-3 mx-auto max-w-6xl p-4">
         <NavLink to="/" className="flex items-center gap-4">
           <img
             src="/pokeball.webp"
