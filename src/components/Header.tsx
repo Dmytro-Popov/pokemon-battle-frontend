@@ -5,7 +5,7 @@ import { clearToken, getToken } from '../utils/auth'
 const links = [
   { to: '/roster', label: 'Roster' },
   { to: '/battle', label: 'Battle' },
-  { to: '/ranks', label: 'Ranks' },
+  { to: '/leaderboard', label: 'Ranks' },
 ]
 
 const linkBase =
