@@ -6,11 +6,19 @@ import {
   type ComponentProps,
 } from 'react'
 import PokemonCard from '../components/PokemonCard'
-import { PokemonModal } from '../components/PokemonModal'
+import {
+  PokemonModal,
+  type AddToRosterResult,
+} from '../components/PokemonModal'
 import { Hero } from '../components/Hero'
 import RosterActions from '../components/RosterActions'
 import { usePokemonSearch } from '../utils/usePokemonSearch'
 import { usePokemonActions } from '../utils/usePokemonActions'
+import {
+  MAX_ROSTER_SIZE,
+  readRoster,
+  saveRoster,
+} from '../utils/roster'
 
 type PokemonListItem = { id: number; name: string }
 type Mon = Parameters<
@@ -25,13 +33,11 @@ export default function Home() {
   const sentinelRef = useRef<HTMLDivElement | null>(null)
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const closeModal = useCallback(() => setSelectedId(null), [])
-  const [roster, setRoster] = useState<Mon[]>([])
   const [query, setQuery] = useState('')
   const { results } = usePokemonSearch(query)
   const { addRandomToRoster, shuffle, isAdding, message } = usePokemonActions({
     pokemon,
     setPokemon,
-    onRosterChange: setRoster,
   })
 
   useEffect(() => {
@@ -61,10 +67,36 @@ export default function Home() {
     return () => observer.disconnect()
   }, [pokemon.length])
 
-  const addToRoster = useCallback((mon: Mon) => {
-    setRoster((prev) =>
-      prev.some((m) => m.id === mon.id) ? prev : [...prev, mon],
-    )
+  const addToRoster = useCallback((mon: Mon): AddToRosterResult => {
+    try {
+      const currentRoster = readRoster('roster')
+      if (currentRoster.some((item) => item.id === mon.id)) {
+        return {
+          added: false,
+          message: `${mon.name} is already in your roster.`,
+        }
+      }
+      if (currentRoster.length >= MAX_ROSTER_SIZE) {
+        return {
+          added: false,
+          message: `Roster is full: ${MAX_ROSTER_SIZE}/${MAX_ROSTER_SIZE}.`,
+        }
+      }
+
+      saveRoster('roster', [...currentRoster, mon])
+      return {
+        added: true,
+        message: `${mon.name} added to your roster!`,
+      }
+    } catch (error) {
+      return {
+        added: false,
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Could not add the Pokémon to your roster.',
+      }
+    }
   }, [])
 
   return (

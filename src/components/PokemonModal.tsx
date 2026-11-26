@@ -4,9 +4,16 @@ import { typeColor } from "../utils/poke";
 export type Mon = {
   id: number;
   name: string;
+  height: number;
+  weight: number;
   types: string[];
   stats: Record<string, number>;
   abilities: string[];
+};
+
+export type AddToRosterResult = {
+  added: boolean;
+  message: string;
 };
 
 const art = (id: number) =>
@@ -26,12 +33,15 @@ function TypeBadge({ type }: { type: string }) {
 type PokemonModalProps = {
   id: number;
   onClose: () => void;
-  onAddToRoster?: (pokemon: Mon) => void;
+  onAddToRoster?: (pokemon: Mon) => AddToRosterResult;
 };
 
 export function PokemonModal({ id, onClose, onAddToRoster }: PokemonModalProps) {
   const [pokemon, setPokemon] = useState<Mon | null>(null);
   const [error, setError] = useState("");
+  const [rosterResult, setRosterResult] = useState<AddToRosterResult | null>(
+    null,
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -47,6 +57,8 @@ export function PokemonModal({ id, onClose, onAddToRoster }: PokemonModalProps) 
         setPokemon({
           id: data.id,
           name: data.name,
+          height: data.height,
+          weight: data.weight,
           types: data.types.map((item: any) => item.type.name),
           abilities: data.abilities.map((item: any) => item.ability.name),
           stats: Object.fromEntries(
@@ -162,13 +174,23 @@ export function PokemonModal({ id, onClose, onAddToRoster }: PokemonModalProps) 
               </p>
 
               {onAddToRoster && (
-                <button
-                  type="button"
-                  onClick={() => onAddToRoster(pokemon)}
-                  className="brut press mt-6 w-full bg-success py-3 font-pixel text-xs"
-                >
-                  + Add to roster
-                </button>
+                <>
+                  {rosterResult && (
+                    <p role="status" className="mt-4 text-sm font-bold">
+                      {rosterResult.message}
+                    </p>
+                  )}
+                  <button
+                    type="button"
+                    disabled={rosterResult?.added}
+                    onClick={() => setRosterResult(onAddToRoster(pokemon))}
+                    className="brut press mt-6 w-full bg-success py-3 font-pixel text-xs disabled:opacity-70"
+                  >
+                    {rosterResult?.added
+                      ? `${pokemon.name} added to Roster`
+                      : '+ Add to roster'}
+                  </button>
+                </>
               )}
             </>
           )}
