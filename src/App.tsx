@@ -14,10 +14,10 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/battle" element={<Battle />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/roster" element={<p>This page is not yet ready</p>} />
+        <Route path="/battle" element={<Battle />} />
         </Route>
 
         <Route path="*" element={<p>This page is not yet ready</p>} />
