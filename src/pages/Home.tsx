@@ -8,9 +8,11 @@ import {
 import PokemonCard from '../components/PokemonCard'
 import { PokemonModal } from '../components/PokemonModal'
 import { Hero } from '../components/Hero'
+import RosterActions from '../components/RosterActions'
 import { usePokemonSearch } from '../utils/usePokemonSearch'
+import { usePokemonActions } from '../utils/usePokemonActions'
 
-type PokemonListItem = { name: string; url: string }
+type PokemonListItem = { id: number; name: string }
 type Mon = Parameters<
   NonNullable<ComponentProps<typeof PokemonModal>['onAddToRoster']>
 >[0]
@@ -26,11 +28,23 @@ export default function Home() {
   const [roster, setRoster] = useState<Mon[]>([])
   const [query, setQuery] = useState('')
   const { results } = usePokemonSearch(query)
+  const { addRandomToRoster, shuffle, isAdding, message } = usePokemonActions({
+    pokemon,
+    setPokemon,
+    onRosterChange: setRoster,
+  })
 
   useEffect(() => {
     fetch('https://pokeapi.co/api/v2/pokemon?limit=100000')
       .then((res) => res.json())
-      .then((data) => setPokemon(data.results))
+      .then((data) =>
+        setPokemon(
+          data.results.map((item: { name: string; url: string }) => ({
+            id: Number(item.url.split('/').filter(Boolean).pop()),
+            name: item.name,
+          })),
+        ),
+      )
   }, [])
 
   useEffect(() => {
@@ -69,30 +83,38 @@ export default function Home() {
             { label: 'My roster', to: '/roster' },
           ]}
         />
-        <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-2xl font-bold font-pixel">Pokédex</h2>
+          <div className="flex w-full items-center justify-start gap-2 sm:w-auto sm:flex-1">
+            <RosterActions
+              onRandom={addRandomToRoster}
+              onShuffle={shuffle}
+              isAdding={isAdding}
+              randomDisabled={!pokemon.length}
+              shuffleDisabled={!pokemon.length || results !== null}
+              message={message}
+            />
+          </div>
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search Pokémon"
             aria-label="Search Pokémon"
-            className="brut-sm w-64 bg-card px-3 py-2 outline-none focus:bg-accent"
+            className="brut-sm w-full bg-card px-3 py-2 outline-none focus:bg-accent sm:w-64"
           />
         </div>
+
         {results === null ? (
           <>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              {pokemon.slice(0, visibleCount).map((p) => {
-                const id = Number(p.url.split('/').filter(Boolean).pop())
-                return (
-                  <PokemonCard
-                    key={id}
-                    id={id}
-                    name={p.name}
-                    onClick={() => setSelectedId(id)}
-                  />
-                )
-              })}
+              {pokemon.slice(0, visibleCount).map((p) => (
+                <PokemonCard
+                  key={p.id}
+                  id={p.id}
+                  name={p.name}
+                  onClick={() => setSelectedId(p.id)}
+                />
+              ))}
             </div>
             <div ref={sentinelRef} className="h-10" />
           </>
