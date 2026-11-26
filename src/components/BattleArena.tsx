@@ -10,6 +10,8 @@ type Props = {
   opponent: BattlePokemon
   playerHealth: number
   opponentHealth: number
+  attackAnimation: 'player' | 'opponent' | null
+  damagePopup: { target: 'player' | 'opponent'; amount: number; id: number } | null
 }
 
 function HealthBar({ name, health }: { name: string; health: number }) {
@@ -41,6 +43,8 @@ export default function BattleArena({
   opponent,
   playerHealth,
   opponentHealth,
+  attackAnimation,
+  damagePopup,
 }: Props) {
   return (
     <section
@@ -51,23 +55,37 @@ export default function BattleArena({
       <div className="grid min-h-[28rem] items-center gap-8 bg-black/10 p-8 md:grid-cols-2 md:gap-12">
         <div className="order-2 flex flex-col items-center justify-center gap-3 md:order-1">
           <HealthBar name={player.name} health={playerHealth} />
-          <div className="flex min-h-48 w-full items-end justify-center">
+          <div className="relative flex min-h-48 w-full items-end justify-center">
             <img
               src={pokemonBackSprite(player.id)}
               alt={`${player.name}, player's Pokémon`}
-              className="max-h-56 w-56 object-contain drop-shadow-[6px_6px_0_var(--color-border)] sm:w-64"
+              className={`max-h-56 w-56 object-contain drop-shadow-[6px_6px_0_var(--color-border)] sm:w-64 ${
+                attackAnimation === 'player' ? 'animate-battle-attack' : ''
+              }`}
             />
+            {damagePopup?.target === 'player' && (
+              <span key={damagePopup.id} className="battle-damage-popup">
+                -{damagePopup.amount}%
+              </span>
+            )}
           </div>
         </div>
 
         <div className="order-1 flex flex-col items-center justify-center gap-3 md:order-2">
           <HealthBar name={opponent.name} health={opponentHealth} />
-          <div className="flex min-h-48 w-full items-end justify-center">
+          <div className="relative flex min-h-48 w-full items-end justify-center">
             <img
               src={pokemonFrontSprite(opponent.id)}
               alt={`${opponent.name}, opponent's Pokémon`}
-              className="max-h-56 w-56 object-contain drop-shadow-[6px_6px_0_var(--color-border)] sm:w-64"
+              className={`max-h-56 w-56 object-contain drop-shadow-[6px_6px_0_var(--color-border)] sm:w-64 ${
+                attackAnimation === 'opponent' ? 'animate-battle-attack' : ''
+              }`}
             />
+            {damagePopup?.target === 'opponent' && (
+              <span key={damagePopup.id} className="battle-damage-popup">
+                -{damagePopup.amount}%
+              </span>
+            )}
           </div>
         </div>
       </div>

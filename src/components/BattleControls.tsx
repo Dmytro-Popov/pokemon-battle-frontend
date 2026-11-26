@@ -4,6 +4,7 @@ type Props = {
   attacks: BattleAttack[]
   team: BattlePokemon[]
   activeId: number
+  faintedIds: number[]
   disabled: boolean
   onAttack: (attack: BattleAttack) => void
   onChoosePokemon: (pokemon: BattlePokemon) => void
@@ -13,6 +14,7 @@ export default function BattleControls({
   attacks,
   team,
   activeId,
+  faintedIds,
   disabled,
   onAttack,
   onChoosePokemon,
@@ -43,20 +45,33 @@ export default function BattleControls({
         <h2 className="mb-3 font-pixel text-sm">POKÉMON</h2>
         <div className="grid grid-cols-3 gap-3">
           {team.map((pokemon) => (
-            <button
-              key={pokemon.id}
-              type="button"
-              disabled={disabled || pokemon.id === activeId}
-              onClick={() => onChoosePokemon(pokemon)}
-              className="brut-sm press bg-card p-2 text-left text-foreground disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <span className="block truncate text-xs font-bold capitalize">
-                {pokemon.name}
-              </span>
-              <span className="mt-1 block text-[10px] uppercase text-muted-foreground">
-                {pokemon.types[0] ?? 'normal'}
-              </span>
-            </button>
+            (() => {
+              const isActive = pokemon.id === activeId
+              const isFainted = faintedIds.includes(pokemon.id)
+
+              return (
+                <button
+                  key={pokemon.id}
+                  type="button"
+                  disabled={disabled || isActive || isFainted}
+                  onClick={() => onChoosePokemon(pokemon)}
+                  className={`brut-sm press p-2 text-left text-foreground ${
+                    isActive
+                      ? 'bg-accent'
+                      : isFainted
+                        ? 'cursor-not-allowed bg-muted text-muted-foreground'
+                        : 'bg-card'
+                  } ${isFainted ? 'opacity-60' : ''}`}
+                >
+                  <span className="block truncate text-xs font-bold capitalize">
+                    {pokemon.name}
+                  </span>
+                  <span className="mt-1 block text-[10px] uppercase text-muted-foreground">
+                    {isFainted ? 'fainted' : pokemon.types[0] ?? 'normal'}
+                  </span>
+                </button>
+              )
+            })()
           ))}
         </div>
       </div>
