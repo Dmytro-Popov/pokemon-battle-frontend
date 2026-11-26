@@ -69,7 +69,6 @@ export default function Header() {
             )}
           </svg>
         </button>
-
         <nav
           id="primary-navigation"
           className={`${menuOpen ? 'flex' : 'hidden'} w-full flex-col items-stretch gap-3 lg:flex lg:w-auto lg:flex-row lg:items-center`}
@@ -78,7 +77,7 @@ export default function Header() {
             .filter(
               ({ to }) =>
                 canAccessPrivatePages ||
-                to !== '/roster',
+                 to !== '/roster' && to !== '/battle',
             )
             .map(({ to, label }) => (
               <NavLink
