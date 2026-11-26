@@ -11,6 +11,11 @@ export type Mon = {
   abilities: string[];
 };
 
+export type AddToRosterResult = {
+  added: boolean;
+  message: string;
+};
+
 const art = (id: number) =>
   `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
 
@@ -28,13 +33,15 @@ function TypeBadge({ type }: { type: string }) {
 type PokemonModalProps = {
   id: number;
   onClose: () => void;
-  onAddToRoster?: (pokemon: Mon) => string;
+  onAddToRoster?: (pokemon: Mon) => AddToRosterResult;
 };
 
 export function PokemonModal({ id, onClose, onAddToRoster }: PokemonModalProps) {
   const [pokemon, setPokemon] = useState<Mon | null>(null);
   const [error, setError] = useState("");
-  const [rosterMessage, setRosterMessage] = useState("");
+  const [rosterResult, setRosterResult] = useState<AddToRosterResult | null>(
+    null,
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -168,17 +175,20 @@ export function PokemonModal({ id, onClose, onAddToRoster }: PokemonModalProps) 
 
               {onAddToRoster && (
                 <>
-                  {rosterMessage && (
+                  {rosterResult && (
                     <p role="status" className="mt-4 text-sm font-bold">
-                      {rosterMessage}
+                      {rosterResult.message}
                     </p>
                   )}
                   <button
                     type="button"
-                    onClick={() => setRosterMessage(onAddToRoster(pokemon))}
-                    className="brut press mt-6 w-full bg-success py-3 font-pixel text-xs"
+                    disabled={rosterResult?.added}
+                    onClick={() => setRosterResult(onAddToRoster(pokemon))}
+                    className="brut press mt-6 w-full bg-success py-3 font-pixel text-xs disabled:opacity-70"
                   >
-                    + Add to roster
+                    {rosterResult?.added
+                      ? `${pokemon.name} added to Roster`
+                      : '+ Add to roster'}
                   </button>
                 </>
               )}
