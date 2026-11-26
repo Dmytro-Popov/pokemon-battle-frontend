@@ -19,7 +19,7 @@ export type AddToRosterResult = {
 const art = (id: number) =>
   `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
 
-function TypeBadge({ type }: { type: string }) {
+export function TypeBadge({ type }: { type: string }) {
   return (
     <span
       className="brut-sm px-2 py-0.5 text-xs font-bold uppercase"
