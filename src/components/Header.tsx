@@ -25,7 +25,7 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-primary border-b-4 border-border lg:sticky lg:top-0 lg:z-50">
+    <header className="bg-primary border-b-4 border-border sticky top-0 z-50 lg:sticky lg:top-0 lg:z-50">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-3 lg:px-6">
         <NavLink
           to="/"
