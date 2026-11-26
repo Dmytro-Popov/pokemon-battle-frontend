@@ -1,8 +1,8 @@
+import { useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { clearToken, getToken } from '../utils/auth'
 
 const links = [
-  { to: '/pokedex', label: 'Pokédex' },
   { to: '/roster', label: 'Roster' },
   { to: '/battle', label: 'Battle' },
   { to: '/ranks', label: 'Ranks' },
@@ -14,29 +14,66 @@ const linkBase =
 export default function Header() {
   const nav = useNavigate()
   useLocation()
+  const [menuOpen, setMenuOpen] = useState(false)
   const loggedIn = Boolean(getToken())
   const canAccessPrivatePages = loggedIn || import.meta.env.DEV
 
   const logout = () => {
     clearToken()
+    setMenuOpen(false)
     nav('/login')
   }
 
   return (
-    <header className="bg-primary border-b-4 border-border">
-      <div className="flex items-center justify-between gap-4 px-6 py-3 mx-auto max-w-6xl p-4">
-        <NavLink to="/" className="flex items-center gap-4">
+    <header className="bg-primary border-b-4 border-border lg:sticky lg:top-0 lg:z-50">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-3 lg:px-6">
+        <NavLink
+          to="/"
+          className="flex items-center gap-3"
+          onClick={() => {
+            setMenuOpen(false)
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          }}
+        >
           <img
             src="/pokeball.webp"
             alt="PokéArena"
-            className="size-11 shrink-0"
+            className="size-10 shrink-0 sm:size-11"
           />{' '}
-          <span className="font-pixel text-2xl text-primary-foreground">
+          <span className="font-pixel text-xl text-primary-foreground sm:text-2xl">
             PokéArena
           </span>
         </NavLink>
 
-        <nav className="flex items-center gap-3">
+        <button
+          type="button"
+          className="brut-sm press flex size-11 items-center justify-center bg-card text-foreground lg:hidden"
+          aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-expanded={menuOpen}
+          aria-controls="primary-navigation"
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            className="size-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          >
+            {menuOpen ? (
+              <path d="M6 6l12 12M18 6L6 18" />
+            ) : (
+              <path d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
+        </button>
+
+        <nav
+          id="primary-navigation"
+          className={`${menuOpen ? 'flex' : 'hidden'} w-full flex-col items-stretch gap-3 lg:flex lg:w-auto lg:flex-row lg:items-center`}
+        >
           {links
             .filter(
               ({ to }) =>
@@ -44,24 +81,25 @@ export default function Header() {
                 (to !== '/roster' && to !== '/battle'),
             )
             .map(({ to, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                `${linkBase} ${
-                  isActive ? 'bg-accent' : 'bg-card'
-                } text-foreground`
-              }
-            >
-              {label}
-            </NavLink>
+              <NavLink
+                key={to}
+                to={to}
+                onClick={() => setMenuOpen(false)}
+                className={({ isActive }) =>
+                  `${linkBase} w-full lg:w-auto ${
+                    isActive ? 'bg-accent' : 'bg-card'
+                  } text-foreground`
+                }
+              >
+                {label}
+              </NavLink>
             ))}
 
           {loggedIn ? (
             <button
               type="button"
               onClick={logout}
-              className={`${linkBase} bg-foreground text-background`}
+              className={`${linkBase} w-full bg-foreground text-background lg:w-auto`}
             >
               Logout
             </button>
@@ -69,13 +107,15 @@ export default function Header() {
             <>
               <NavLink
                 to="/login"
-                className={`${linkBase} bg-foreground text-background`}
+                onClick={() => setMenuOpen(false)}
+                className={`${linkBase} w-full bg-foreground text-background lg:w-auto`}
               >
                 Login
               </NavLink>
               <NavLink
                 to="/register"
-                className={`${linkBase} bg-card text-foreground`}
+                onClick={() => setMenuOpen(false)}
+                className={`${linkBase} w-full bg-card text-foreground lg:w-auto`}
               >
                 Register
               </NavLink>
