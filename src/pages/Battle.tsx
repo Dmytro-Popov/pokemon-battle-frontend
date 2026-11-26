@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import BattleArena from '../components/BattleArena'
 import BattleControls from '../components/BattleControls'
 import BattleTeamPanel from '../components/BattleTeamPanel'
+import { postScore } from '../utils/leaderboard'
 import { loadPokemon } from '../utils/pokeApi'
 import {
   BATTLE_ATTACKS,
@@ -35,11 +36,30 @@ export default function Battle() {
   const popupSequence = useRef(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [battleResult, setBattleResult] = useState<'win' | 'loss' | null>(null)
+const [saveMessage, setSaveMessage] = useState('')
+const scoreSaved = useRef(false)
   const { names, error: namesError } = usePokemonNames()
 
   useEffect(() => {
     document.title = 'Battle — PokéArena'
   }, [])
+
+  useEffect(() => {
+  if (battleResult !== 'win' || scoreSaved.current) return
+  scoreSaved.current = true // щоб не надіслати двічі (StrictMode, повторні рендери)
+
+  const survivors = playerTeam.length - faintedPlayerIds.length
+  const points = 100 * opponentTeam.length + 50 * survivors
+
+  postScore(points)
+    .then(() => setSaveMessage(`+${points} points saved to the leaderboard!`))
+    .catch((error) =>
+      setSaveMessage(
+        error instanceof Error ? error.message : 'Could not save the score.',
+      ),
+    )
+}, [battleResult, playerTeam.length, opponentTeam.length, faintedPlayerIds.length])
 
   useEffect(() => {
     let cancelled = false
@@ -75,6 +95,8 @@ export default function Battle() {
         setFaintedPlayerIds([])
         setFaintedOpponentIds([])
         setBattleOver(false)
+        setBattleResult(null)             
+setSaveMessage('')                
         setBattleMessage('Choose an attack.')
         setAttackAnimation(null)
         setDamagePopup(null)
@@ -131,6 +153,7 @@ export default function Battle() {
     )
     if (!nextOpponent) {
       setBattleOver(true)
+       setBattleResult('win') 
       setBattleMessage('You win the battle!')
       return
     }
@@ -147,6 +170,7 @@ export default function Battle() {
     )
     if (!nextPlayer) {
       setBattleOver(true)
+       setBattleResult('loss') 
       setBattleMessage('You lost the battle.')
       return
     }
@@ -281,6 +305,9 @@ export default function Battle() {
           <p className="mt-4 min-h-6 text-center text-sm font-bold" role="status" aria-live="polite">
             {battleMessage}
           </p>
+          {saveMessage && (
+  <p className="mt-2 text-center text-sm font-bold">{saveMessage}</p>
+)}
           <BattleControls
             attacks={BATTLE_ATTACKS}
             team={playerTeam}
