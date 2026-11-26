@@ -6,6 +6,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Battle from './pages/Battle'
 import Leaderboard from './pages/Leaderboard'
+import Roster from './pages/Roster';
 
 export default function App() {
   return (
@@ -16,7 +17,7 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route element={<ProtectedRoute />}>
-          <Route path="/roster" element={<p>This page is not yet ready</p>} />
+          <Route path="/roster" element={<Roster />} />
         <Route path="/battle" element={<Battle />} />
         </Route>
 
