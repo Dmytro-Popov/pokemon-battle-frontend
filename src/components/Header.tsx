@@ -41,7 +41,7 @@ export default function Header() {
             .filter(
               ({ to }) =>
                 canAccessPrivatePages ||
-                (to !== '/roster' && to !== '/battle'),
+                to !== '/roster',
             )
             .map(({ to, label }) => (
             <NavLink
