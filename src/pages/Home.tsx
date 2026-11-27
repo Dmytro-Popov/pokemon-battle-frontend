@@ -5,6 +5,7 @@ import {
   useState,
   type ComponentProps,
 } from 'react'
+import { useNavigate } from 'react-router-dom'
 import PokemonCard from '../components/PokemonCard'
 import {
   PokemonModal,
@@ -19,6 +20,7 @@ import {
   readRoster,
   saveRoster,
 } from '../utils/roster'
+import { getToken } from '../utils/auth'
 
 type PokemonListItem = { id: number; name: string }
 type Mon = Parameters<
@@ -39,6 +41,7 @@ export default function Home() {
     pokemon,
     setPokemon,
   })
+  const navigate = useNavigate()
 
   useEffect(() => {
     fetch('https://pokeapi.co/api/v2/pokemon?limit=100000')
@@ -68,6 +71,10 @@ export default function Home() {
   }, [pokemon.length])
 
   const addToRoster = useCallback((mon: Mon): AddToRosterResult => {
+    if (!getToken()) {
+      navigate('/login')
+      return { added: false, message: 'Log in to build your roster.' }
+    }
     try {
       const currentRoster = readRoster('roster')
       if (currentRoster.some((item) => item.id === mon.id)) {
@@ -77,6 +84,7 @@ export default function Home() {
         }
       }
       if (currentRoster.length >= MAX_ROSTER_SIZE) {
+        navigate('/roster')
         return {
           added: false,
           message: `Roster is full: ${MAX_ROSTER_SIZE}/${MAX_ROSTER_SIZE}.`,
@@ -97,7 +105,7 @@ export default function Home() {
             : 'Could not add the Pokémon to your roster.',
       }
     }
-  }, [])
+  }, [navigate])
 
   return (
     <>
