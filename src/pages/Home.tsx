@@ -41,7 +41,15 @@ export default function Home() {
     pokemon,
     setPokemon,
   })
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  const handleRandom = () => {
+  if (!getToken()) {
+    navigate('/login')
+    return
+  }
+  addRandomToRoster()
+};
 
   useEffect(() => {
     fetch('https://pokeapi.co/api/v2/pokemon?limit=100000')
@@ -127,7 +135,7 @@ export default function Home() {
           <h2 className="text-2xl font-bold font-pixel">Pokédex</h2>
           <div className="flex w-full items-center justify-start gap-2 sm:w-auto sm:flex-1">
             <RosterActions
-              onRandom={addRandomToRoster}
+              onRandom={handleRandom}
               onShuffle={shuffle}
               isAdding={isAdding}
               randomDisabled={!pokemon.length}
