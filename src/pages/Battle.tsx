@@ -14,6 +14,7 @@ import {
 } from '../utils/battle'
 import { readRoster } from '../utils/roster'
 import { usePokemonNames } from '../utils/usePokemonNames'
+import { playAttackSound } from '../utils/sounds'
 
 export default function Battle() {
   const [playerTeam, setPlayerTeam] = useState<BattlePokemon[]>([])
@@ -199,6 +200,7 @@ setSaveMessage('')
       Math.round((firstDamage / (second.stats.hp ?? 1)) * 100),
     )
     setAttackAnimation(playerGoesFirst ? 'player' : 'opponent')
+    playAttackSound(firstAttack.name, playerGoesFirst ? 'player' : 'opponent')
     showDamagePopup(
       playerGoesFirst ? 'opponent' : 'player',
       firstDamagePercent,
@@ -240,6 +242,7 @@ setSaveMessage('')
         1,
         Math.round((responseDamage / (first.stats.hp ?? 1)) * 100),
       )
+       playAttackSound(responseAttack.name, playerGoesFirst ? 'opponent' : 'player')
 
       if (playerGoesFirst) {
         setAttackAnimation('opponent')
