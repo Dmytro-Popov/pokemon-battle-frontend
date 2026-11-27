@@ -65,7 +65,7 @@ export function refreshAccessToken(): Promise<string> {
     const send = (token: string | null) => {
       const headers = new Headers(init.headers);
 
-      if (!token) headers.set("Authorization", `Bearer ${token}`);
+      if (token) headers.set("Authorization", `Bearer ${token}`);
 
       return fetch(url, {...init, headers})
     }
