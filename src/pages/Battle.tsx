@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import BattleArena from '../components/BattleArena'
 import BattleControls from '../components/BattleControls'
 import BattleTeamPanel from '../components/BattleTeamPanel'
@@ -15,6 +15,7 @@ import {
 import { readRoster } from '../utils/roster'
 import { usePokemonNames } from '../utils/usePokemonNames'
 import { playAttackSound } from '../utils/sounds'
+import BattleResultOverlay from '../components/BattleResultOverlay'
 
 export default function Battle() {
   const [playerTeam, setPlayerTeam] = useState<BattlePokemon[]>([])
@@ -39,7 +40,11 @@ export default function Battle() {
   const [error, setError] = useState('')
   const [battleResult, setBattleResult] = useState<'win' | 'loss' | null>(null)
 const [saveMessage, setSaveMessage] = useState('')
+const [resultDismissed, setResultDismissed] = useState(false)
+const closeResult = useCallback(() => setResultDismissed(true), [])
 const scoreSaved = useRef(false)
+const [battleRound, setBattleRound] = useState(0)
+const restartBattle = () => setBattleRound((round) => round + 1)
   const { names, error: namesError } = usePokemonNames()
 
   useEffect(() => {
@@ -87,6 +92,7 @@ const scoreSaved = useRef(false)
         )
 
         if (cancelled) return
+        scoreSaved.current = false
         setPlayerTeam(playerSelection)
         setActivePlayer(playerSelection[0] ?? null)
         setOpponentTeam(loadedOpponents)
@@ -96,8 +102,9 @@ const scoreSaved = useRef(false)
         setFaintedPlayerIds([])
         setFaintedOpponentIds([])
         setBattleOver(false)
-        setBattleResult(null)             
-setSaveMessage('')                
+        setBattleResult(null)   
+        setResultDismissed(false)          
+        setSaveMessage('')                
         setBattleMessage('Choose an attack.')
         setAttackAnimation(null)
         setDamagePopup(null)
@@ -123,7 +130,7 @@ setSaveMessage('')
     return () => {
       cancelled = true
     }
-  }, [names, namesError])
+  }, [names, namesError, battleRound])
 
   const teamMessage = useMemo(() => {
     if (loading) return 'Preparing a random battle…'
@@ -280,6 +287,9 @@ setSaveMessage('')
 
   return (
     <main className="mx-auto max-w-6xl p-4">
+      {battleResult && !resultDismissed && (
+        <BattleResultOverlay result={battleResult} onClose={closeResult} />
+        )}
       <div className="mb-6">
         <p className="font-pixel text-xs text-muted-foreground">Battle 001</p>
         <h1 className="mt-2 font-pixel text-2xl">Pokémon battle</h1>
@@ -305,9 +315,22 @@ setSaveMessage('')
 
       {activePlayer && activeOpponent && (
         <>
-          <p className="mt-4 min-h-6 text-center text-sm font-bold" role="status" aria-live="polite">
-            {battleMessage}
-          </p>
+          {battleOver ? (
+  <div className="mt-4 flex justify-center">
+    <button
+      type="button"
+      onClick={restartBattle}
+      disabled={loading}
+      className="brut press bg-primary px-6 py-3 font-pixel text-xs text-primary-foreground disabled:opacity-60"
+    >
+      {loading ? '...' : '↻ Start over'}
+    </button>
+  </div>
+) : (
+  <p className="mt-4 min-h-6 text-center text-sm font-bold" role="status" aria-live="polite">
+    {battleMessage}
+  </p>
+)}
           {saveMessage && (
   <p className="mt-2 text-center text-sm font-bold">{saveMessage}</p>
 )}
