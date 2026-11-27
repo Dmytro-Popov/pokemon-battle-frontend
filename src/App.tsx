@@ -7,6 +7,7 @@ import Register from './pages/Register'
 import Battle from './pages/Battle'
 import Leaderboard from './pages/Leaderboard'
 import Roster from './pages/Roster';
+import NotFound from './pages/NotFound';
 
 export default function App() {
   return (
@@ -21,7 +22,7 @@ export default function App() {
         <Route path="/battle" element={<Battle />} />
         </Route>
 
-        <Route path="*" element={<p>This page is not yet ready</p>} />
+        <Route path="*" element={<NotFound/>} />
       </Route>
     </Routes>
   )
