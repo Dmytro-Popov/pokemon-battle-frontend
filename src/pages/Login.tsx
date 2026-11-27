@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { authRequest, setSession } from "../utils/auth";
+import RetroLoader from "../components/RetroLoader";
 
 export default function Login() {
   const nav = useNavigate();
@@ -61,6 +62,7 @@ export default function Login() {
             {err}
           </p>
         )}
+        {loading && <RetroLoader label="Logging in" />}
         <button
           disabled={loading}
           className="brut press w-full bg-primary py-3 font-pixel text-xs text-primary-foreground disabled:opacity-60"

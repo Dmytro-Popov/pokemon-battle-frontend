@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchLeaderboard, type Entry } from "../utils/leaderboard";
+import RetroLoader from "../components/RetroLoader";
 
 const podium = [
   { place: 2, style: "bg-card py-6" },
@@ -26,7 +27,7 @@ export default function Leaderboard() {
     <div className="mx-auto max-w-4xl space-y-8">
       <h1 className="font-pixel text-3xl">Leaderboard</h1>
 
-      {loading && <p>Loading...</p>}
+      {loading && <RetroLoader label="Loading ranks" framed />}
       {err && (
         <p className="brut-sm bg-destructive px-3 py-2 text-sm font-bold text-primary-foreground">
           {err}

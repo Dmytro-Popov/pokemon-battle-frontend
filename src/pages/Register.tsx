@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authRequest, setSession } from "../utils/auth";
+import RetroLoader from "../components/RetroLoader";
 
 export default function Register() {
   const nav = useNavigate();
@@ -69,6 +70,7 @@ export default function Register() {
             {err}
           </p>
         )}
+        {loading && <RetroLoader label="Creating account" />}
         <button
           disabled={loading}
           className="brut press w-full bg-primary py-3 font-pixel text-xs text-primary-foreground disabled:opacity-60"
