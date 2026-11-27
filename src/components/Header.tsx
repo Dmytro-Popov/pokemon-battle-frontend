@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { clearSession, getToken } from '../utils/auth'
+import { clearSession, getToken, getUsername } from '../utils/auth'
 
 const links = [
   { to: '/roster', label: 'Roster' },
@@ -16,6 +16,7 @@ export default function Header() {
   useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const loggedIn = Boolean(getToken())
+  const username = getUsername() ?? "Trainer"
   const canAccessPrivatePages = loggedIn 
 
   const logout = () => {
@@ -95,6 +96,19 @@ export default function Header() {
             ))}
 
           {loggedIn ? (
+            <>
+            <span
+      title={username}
+      className="brut-sm flex w-full items-center justify-center gap-2 bg-accent px-4 py-2 text-lg font-bold leading-none text-foreground lg:w-auto"
+    >
+      <span
+        aria-hidden="true"
+        className="grid size-7 place-items-center rounded-full border-2 border-border bg-card font-pixel text-[10px]"
+      >
+        {username.charAt(0).toUpperCase()}
+      </span>
+      <span className="max-w-40 truncate">{username}</span>
+    </span>
             <button
               type="button"
               onClick={logout}
@@ -102,6 +116,7 @@ export default function Header() {
             >
               Logout
             </button>
+            </>
           ) : (
             <>
               <NavLink
@@ -111,13 +126,7 @@ export default function Header() {
               >
                 Login
               </NavLink>
-              <NavLink
-                to="/register"
-                onClick={() => setMenuOpen(false)}
-                className={`${linkBase} w-full bg-card text-foreground lg:w-auto`}
-              >
-                Register
-              </NavLink>
+              
             </>
           )}
         </nav>
