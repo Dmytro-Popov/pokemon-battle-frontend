@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { TypeBadge } from "../components/PokemonModal";
+import { PokemonModal, TypeBadge } from "../components/PokemonModal";
 import {
   MAX_ROSTER_SIZE,
   readRoster,
@@ -33,6 +33,8 @@ export default function Roster() {
   // Lazy initial state: localStorage is read once, on the first render
   const [{ roster: initialRoster, error }] = useState(loadRoster);
   const [roster, setRoster] = useState<RosterPokemon[]>(initialRoster);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+const closeModal = useCallback(() => setSelectedId(null), []);
 
   useEffect(() => {
     document.title = "My Roster — PokéArena";
@@ -82,36 +84,61 @@ export default function Roster() {
       )}
 
       <ul className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {roster.map((pokemon) => (
-          <li key={pokemon.id} className="brut flex items-center gap-4 bg-card p-4">
-            <img
-              src={art(pokemon.id)}
-              alt={pokemon.name}
-              loading="lazy"
-              className="w-24 rounded-md bg-muted"
-            />
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-bold capitalize">{pokemon.name}</p>
-              <div className="my-1 flex flex-wrap gap-1">
-                {pokemon.types.map((type) => (
-                  <TypeBadge key={type} type={type} />
-                ))}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Total stats {totalStats(pokemon)}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => remove(pokemon.id)}
-              aria-label={`Remove ${pokemon.name} from roster`}
-              className="brut-sm press bg-destructive px-2 font-bold text-primary-foreground"
-            >
-              ✕
-            </button>
-          </li>
-        ))}
-      </ul>
+  {roster.map((pokemon) => (
+    <li key={pokemon.id} className="brut relative bg-card">
+      <button
+        type="button"
+        onClick={() => setSelectedId(pokemon.id)}
+        aria-label={`Show details for ${pokemon.name}`}
+        className="flex min-h-80 w-full flex-col items-center gap-3 p-4 text-left"
+      >
+        <img
+          src={art(pokemon.id)}
+          alt={pokemon.name}
+          loading="lazy"
+          className="aspect-square w-full max-w-52 rounded-md bg-muted"
+        />
+        <div className="w-full">
+          <p className="truncate text-lg font-bold capitalize">{pokemon.name}</p>
+          <div className="my-2 flex flex-wrap gap-1">
+            {pokemon.types.map((type) => (
+              <TypeBadge key={type} type={type} />
+            ))}
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Total stats {totalStats(pokemon)}
+          </p>
+        </div>
+      </button>
+      <button
+  type="button"
+  onClick={() => remove(pokemon.id)}
+  aria-label={`Remove ${pokemon.name} from roster`}
+  title="Remove from roster"
+  className="brut-sm press absolute right-5 bottom-5 grid size-10 place-items-center bg-destructive text-primary-foreground"
+>
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 24 24"
+    className="size-5"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M3 6h18" />
+    <path d="M8 6V4h8v2" />
+    <path d="M6 6l1 14h10l1-14" />
+    <path d="M10 11v6M14 11v6" />
+  </svg>
+</button>
+    </li>
+  ))}
+</ul>
+{selectedId !== null ? (
+  <PokemonModal id={selectedId} onClose={closeModal} />
+) : null}
     </main>
   );
 }
