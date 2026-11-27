@@ -14,14 +14,16 @@ import {
 } from '../utils/battle'
 import { readRoster } from '../utils/roster'
 import { usePokemonNames } from '../utils/usePokemonNames'
-import { playAttackSound } from '../utils/sounds'
+import { playAttackSound, playResultSound } from '../utils/sounds'
 import BattleResultOverlay from '../components/BattleResultOverlay'
 
 export default function Battle() {
   const [playerTeam, setPlayerTeam] = useState<BattlePokemon[]>([])
   const [opponentTeam, setOpponentTeam] = useState<BattlePokemon[]>([])
   const [activePlayer, setActivePlayer] = useState<BattlePokemon | null>(null)
-  const [activeOpponent, setActiveOpponent] = useState<BattlePokemon | null>(null)
+  const [activeOpponent, setActiveOpponent] = useState<BattlePokemon | null>(
+    null,
+  )
   const [playerHealth, setPlayerHealth] = useState(100)
   const [opponentHealth, setOpponentHealth] = useState(100)
   const [faintedPlayerIds, setFaintedPlayerIds] = useState<number[]>([])
@@ -29,7 +31,9 @@ export default function Battle() {
   const [battleMessage, setBattleMessage] = useState('Choose an attack.')
   const [isTurnInProgress, setIsTurnInProgress] = useState(false)
   const [battleOver, setBattleOver] = useState(false)
-  const [attackAnimation, setAttackAnimation] = useState<'player' | 'opponent' | null>(null)
+  const [attackAnimation, setAttackAnimation] = useState<
+    'player' | 'opponent' | null
+  >(null)
   const [damagePopup, setDamagePopup] = useState<{
     target: 'player' | 'opponent'
     amount: number
@@ -39,12 +43,12 @@ export default function Battle() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [battleResult, setBattleResult] = useState<'win' | 'loss' | null>(null)
-const [saveMessage, setSaveMessage] = useState('')
-const [resultDismissed, setResultDismissed] = useState(false)
-const closeResult = useCallback(() => setResultDismissed(true), [])
-const scoreSaved = useRef(false)
-const [battleRound, setBattleRound] = useState(0)
-const restartBattle = () => setBattleRound((round) => round + 1)
+  const [saveMessage, setSaveMessage] = useState('')
+  const [resultDismissed, setResultDismissed] = useState(false)
+  const closeResult = useCallback(() => setResultDismissed(true), [])
+  const scoreSaved = useRef(false)
+  const [battleRound, setBattleRound] = useState(0)
+  const restartBattle = () => setBattleRound((round) => round + 1)
   const { names, error: namesError } = usePokemonNames()
 
   useEffect(() => {
@@ -52,20 +56,25 @@ const restartBattle = () => setBattleRound((round) => round + 1)
   }, [])
 
   useEffect(() => {
-  if (battleResult !== 'win' || scoreSaved.current) return
-  scoreSaved.current = true // щоб не надіслати двічі (StrictMode, повторні рендери)
+    if (battleResult !== 'win' || scoreSaved.current) return
+    scoreSaved.current = true // щоб не надіслати двічі (StrictMode, повторні рендери)
 
-  const survivors = playerTeam.length - faintedPlayerIds.length
-  const points = 100 * opponentTeam.length + 50 * survivors
+    const survivors = playerTeam.length - faintedPlayerIds.length
+    const points = 100 * opponentTeam.length + 50 * survivors
 
-  postScore(points)
-    .then(() => setSaveMessage(`+${points} points saved to the leaderboard!`))
-    .catch((error) =>
-      setSaveMessage(
-        error instanceof Error ? error.message : 'Could not save the score.',
-      ),
-    )
-}, [battleResult, playerTeam.length, opponentTeam.length, faintedPlayerIds.length])
+    postScore(points)
+      .then(() => setSaveMessage(`+${points} points saved to the leaderboard!`))
+      .catch((error) =>
+        setSaveMessage(
+          error instanceof Error ? error.message : 'Could not save the score.',
+        ),
+      )
+  }, [
+    battleResult,
+    playerTeam.length,
+    opponentTeam.length,
+    faintedPlayerIds.length,
+  ])
 
   useEffect(() => {
     let cancelled = false
@@ -83,10 +92,7 @@ const restartBattle = () => setBattleRound((round) => round + 1)
         }
 
         const playerSelection = savedTeam.slice(0, BATTLE_TEAM_SIZE)
-        const opponentSelection = selectRandomItems(
-          names,
-          BATTLE_TEAM_SIZE,
-        )
+        const opponentSelection = selectRandomItems(names, BATTLE_TEAM_SIZE)
         const loadedOpponents = await Promise.all(
           opponentSelection.map((pokemon) => loadPokemon(pokemon.id)),
         )
@@ -102,9 +108,9 @@ const restartBattle = () => setBattleRound((round) => round + 1)
         setFaintedPlayerIds([])
         setFaintedOpponentIds([])
         setBattleOver(false)
-        setBattleResult(null)   
-        setResultDismissed(false)          
-        setSaveMessage('')                
+        setBattleResult(null)
+        setResultDismissed(false)
+        setSaveMessage('')
         setBattleMessage('Choose an attack.')
         setAttackAnimation(null)
         setDamagePopup(null)
@@ -142,7 +148,8 @@ const restartBattle = () => setBattleRound((round) => round + 1)
   }, [error, loading, playerTeam.length])
 
   function choosePlayerPokemon(pokemon: BattlePokemon) {
-    if (isTurnInProgress || battleOver || faintedPlayerIds.includes(pokemon.id)) return
+    if (isTurnInProgress || battleOver || faintedPlayerIds.includes(pokemon.id))
+      return
     setActivePlayer(pokemon)
     setPlayerHealth(100)
     setBattleMessage(`${pokemon.name} is ready to fight.`)
@@ -161,8 +168,9 @@ const restartBattle = () => setBattleRound((round) => round + 1)
     )
     if (!nextOpponent) {
       setBattleOver(true)
-       setBattleResult('win') 
+      setBattleResult('win')
       setBattleMessage('You win the battle!')
+      playResultSound('win')
       return
     }
     setActiveOpponent(nextOpponent)
@@ -178,8 +186,9 @@ const restartBattle = () => setBattleRound((round) => round + 1)
     )
     if (!nextPlayer) {
       setBattleOver(true)
-       setBattleResult('loss') 
+      setBattleResult('loss')
       setBattleMessage('You lost the battle.')
+      playResultSound('loss')
       return
     }
     setActivePlayer(nextPlayer)
@@ -188,12 +197,8 @@ const restartBattle = () => setBattleRound((round) => round + 1)
   }
 
   function performAttack(attack: BattleAttack) {
-    if (
-      isTurnInProgress ||
-      battleOver ||
-      !activePlayer ||
-      !activeOpponent
-    ) return
+    if (isTurnInProgress || battleOver || !activePlayer || !activeOpponent)
+      return
 
     setIsTurnInProgress(true)
     const playerGoesFirst =
@@ -208,14 +213,14 @@ const restartBattle = () => setBattleRound((round) => round + 1)
     )
     setAttackAnimation(playerGoesFirst ? 'player' : 'opponent')
     playAttackSound(firstAttack.name, playerGoesFirst ? 'player' : 'opponent')
-    showDamagePopup(
-      playerGoesFirst ? 'opponent' : 'player',
-      firstDamagePercent,
-    )
+    showDamagePopup(playerGoesFirst ? 'opponent' : 'player', firstDamagePercent)
     window.setTimeout(() => setAttackAnimation(null), 350)
 
     if (playerGoesFirst) {
-      const nextOpponentHealth = Math.max(0, opponentHealth - firstDamagePercent)
+      const nextOpponentHealth = Math.max(
+        0,
+        opponentHealth - firstDamagePercent,
+      )
       setOpponentHealth(nextOpponentHealth)
       setBattleMessage(`${activePlayer.name} used ${attack.name}.`)
 
@@ -249,12 +254,18 @@ const restartBattle = () => setBattleRound((round) => round + 1)
         1,
         Math.round((responseDamage / (first.stats.hp ?? 1)) * 100),
       )
-       playAttackSound(responseAttack.name, playerGoesFirst ? 'opponent' : 'player')
+      playAttackSound(
+        responseAttack.name,
+        playerGoesFirst ? 'opponent' : 'player',
+      )
 
       if (playerGoesFirst) {
         setAttackAnimation('opponent')
         showDamagePopup('player', responseDamagePercent)
-        const nextPlayerHealth = Math.max(0, playerHealth - responseDamagePercent)
+        const nextPlayerHealth = Math.max(
+          0,
+          playerHealth - responseDamagePercent,
+        )
         setPlayerHealth(nextPlayerHealth)
         setBattleMessage(`${activeOpponent.name} used Tackle.`)
         if (nextPlayerHealth <= 0) {
@@ -269,7 +280,10 @@ const restartBattle = () => setBattleRound((round) => round + 1)
       } else {
         setAttackAnimation('player')
         showDamagePopup('opponent', responseDamagePercent)
-        const nextOpponentHealth = Math.max(0, opponentHealth - responseDamagePercent)
+        const nextOpponentHealth = Math.max(
+          0,
+          opponentHealth - responseDamagePercent,
+        )
         setOpponentHealth(nextOpponentHealth)
         setBattleMessage(`${activeOpponent.name} took damage.`)
         if (nextOpponentHealth <= 0) {
@@ -289,7 +303,7 @@ const restartBattle = () => setBattleRound((round) => round + 1)
     <main className="mx-auto max-w-6xl p-4">
       {battleResult && !resultDismissed && (
         <BattleResultOverlay result={battleResult} onClose={closeResult} />
-        )}
+      )}
       <div className="mb-6">
         <p className="font-pixel text-xs text-muted-foreground">Battle 001</p>
         <h1 className="mt-2 font-pixel text-2xl">Pokémon battle</h1>
@@ -304,8 +318,8 @@ const restartBattle = () => setBattleRound((round) => round + 1)
           opponent={activeOpponent}
           playerHealth={playerHealth}
           opponentHealth={opponentHealth}
-            attackAnimation={attackAnimation}
-            damagePopup={damagePopup}
+          attackAnimation={attackAnimation}
+          damagePopup={damagePopup}
         />
       ) : (
         <section className="brut grid min-h-80 place-items-center bg-accent p-8 text-center">
@@ -316,24 +330,28 @@ const restartBattle = () => setBattleRound((round) => round + 1)
       {activePlayer && activeOpponent && (
         <>
           {battleOver ? (
-  <div className="mt-4 flex justify-center">
-    <button
-      type="button"
-      onClick={restartBattle}
-      disabled={loading}
-      className="brut press bg-primary px-6 py-3 font-pixel text-xs text-primary-foreground disabled:opacity-60"
-    >
-      {loading ? '...' : '↻ Start over'}
-    </button>
-  </div>
-) : (
-  <p className="mt-4 min-h-6 text-center text-sm font-bold" role="status" aria-live="polite">
-    {battleMessage}
-  </p>
-)}
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={restartBattle}
+                disabled={loading}
+                className="brut press bg-primary px-6 py-3 font-pixel text-xs text-primary-foreground disabled:opacity-60"
+              >
+                {loading ? '...' : '↻ Start over'}
+              </button>
+            </div>
+          ) : (
+            <p
+              className="mt-4 min-h-6 text-center text-sm font-bold"
+              role="status"
+              aria-live="polite"
+            >
+              {battleMessage}
+            </p>
+          )}
           {saveMessage && (
-  <p className="mt-2 text-center text-sm font-bold">{saveMessage}</p>
-)}
+            <p className="mt-2 text-center text-sm font-bold">{saveMessage}</p>
+          )}
           <BattleControls
             attacks={BATTLE_ATTACKS}
             team={playerTeam}
@@ -348,14 +366,8 @@ const restartBattle = () => setBattleRound((round) => round + 1)
 
       {playerTeam.length > 0 && opponentTeam.length > 0 && (
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
-          <BattleTeamPanel
-            title="Your team"
-            team={playerTeam}
-          />
-          <BattleTeamPanel
-            title="Opponent team"
-            team={opponentTeam}
-          />
+          <BattleTeamPanel title="Your team" team={playerTeam} />
+          <BattleTeamPanel title="Opponent team" team={opponentTeam} />
         </div>
       )}
     </main>

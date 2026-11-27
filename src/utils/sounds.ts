@@ -78,3 +78,32 @@ export function playAttackSound(attackName: string, side: 'player' | 'opponent' 
   } catch {
   }
 }
+
+function melody(c: AudioContext, notes: number[], step: number, type: OscillatorType, lastLong = 0.4) {
+  notes.forEach((freq, i) => {
+    const isLast = i === notes.length - 1
+    tone(c, 1, {
+      type,
+      from: freq,
+      to: freq,
+      duration: isLast ? lastLong : step * 0.9,
+      volume: 0.12,
+      delay: i * step,
+    })
+  })
+}
+
+export function playResultSound(result: 'win' | 'loss') {
+  try {
+    const c = getCtx()
+    if (result === 'win') {
+      melody(c, [523, 659, 784, 1047], 0.12, 'square', 0.5)
+      tone(c, 1, { type: 'square', from: 659, to: 659, duration: 0.5, volume: 0.08, delay: 0.36 })
+      tone(c, 1, { type: 'square', from: 784, to: 784, duration: 0.5, volume: 0.08, delay: 0.36 })
+    } else {
+      melody(c, [392, 370, 349, 330], 0.22, 'triangle', 0.7)
+      tone(c, 1, { type: 'square', from: 165, to: 55, duration: 0.8, volume: 0.1, delay: 0.66 })
+    }
+  } catch {
+  }
+}
